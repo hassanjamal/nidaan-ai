@@ -10,7 +10,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "electron-dev": "nuxt dev & electron .",
-    "electron-build": "nuxt build && electron-builder"
+    "electron-build": "nuxt build && electron-builder",
+    "seed": "node scripts/db/seeder.js"
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.35.0",

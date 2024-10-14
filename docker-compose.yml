@@ -1,6 +1,7 @@
-version: '3'
+version: '3.9'
 
 services:
+  # Nuxt.js application
   nuxt:
     build:
       context: .
@@ -12,7 +13,36 @@ services:
     depends_on:
       - couchdb
       - influxdb
+      - local_pgsql
+      - remote_pgsql
 
+  # Local PostgreSQL instance (store-specific)
+  local_pgsql:
+    image: postgres:latest
+    container_name: local_postgres
+    ports:
+      - "5433:5432"  # Local instance exposed on port 5433
+    environment:
+      - POSTGRES_USER=local_admin
+      - POSTGRES_PASSWORD=local_password
+      - POSTGRES_DB=local_medicine_erp
+    volumes:
+      - local_pgsql_data:/var/lib/postgresql/data
+
+  # Remote PostgreSQL instance (centralized data)
+  remote_pgsql:
+    image: postgres:latest
+    container_name: remote_postgres
+    ports:
+      - "5434:5432"  # Remote instance exposed on port 5434
+    environment:
+      - POSTGRES_USER=remote_admin
+      - POSTGRES_PASSWORD=remote_password
+      - POSTGRES_DB=central_medicine_erp
+    volumes:
+      - remote_pgsql_data:/var/lib/postgresql/data
+
+  # CouchDB service (for document-based storage)
   couchdb:
     image: couchdb:latest
     ports:
@@ -23,6 +53,7 @@ services:
     volumes:
       - couchdb_data:/opt/couchdb/data
 
+  # InfluxDB service (for time-series data)
   influxdb:
     image: influxdb:latest
     ports:
@@ -36,6 +67,17 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb2
 
+  # Adminer (Database management UI)
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - local_pgsql
+      - remote_pgsql
+
 volumes:
+  local_pgsql_data:
+  remote_pgsql_data:
   couchdb_data:
   influxdb_data:

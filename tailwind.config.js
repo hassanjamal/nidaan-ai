@@ -2,9 +2,10 @@
 export default {
   content: [
     "./components/**/*.{vue,js}",
+    "./composables/**/*.{js,ts}",
     "./layouts/**/*.vue",
     "./pages/**/*.vue",
-    "./plugins/**/*.{js,ts}",
+    "./plugins/**/*.js",
     "./nuxt.config.{js,ts}",
   ],
   theme: {

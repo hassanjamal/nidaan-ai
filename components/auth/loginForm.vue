@@ -1,54 +1,53 @@
 <template>
-    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <div class="bg-white p-6 rounded-lg shadow-md w-96">
-            <h2 class="text-2xl font-bold mb-4 text-center">Login</h2>
-
-            <input v-model="username" type="text" placeholder="Enter Username"
-                class="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            <input v-model="password" type="password" placeholder="Enter Password"
-                class="w-full p-2 mb-4 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
-
-            <button @click="login" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+    <div class="w-full max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Login</h2>
+        <form @submit.prevent="handleLogin">
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Username</label>
+                <input type="text" v-model="username"
+                    class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your username" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Password</label>
+                <input type="password" v-model="password"
+                    class="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your password" />
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600">
                 Login
             </button>
+        </form>
 
-            <p v-if="errorMessage" class="mt-4 text-red-500 text-center">{{ errorMessage }}</p>
-        </div>
+        <Toast :title="toastTitle" :message="toastMessage" :type="toastType" :show="toastVisible" />
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import PouchDB from 'pouchdb';
-import { centralDb } from '@/scripts/db/dbConfig.js';
+import Toast from '@/components/ui/Toast.vue';
 
 const username = ref('');
 const password = ref('');
-const errorMessage = ref('');
+const toastVisible = ref(false);
+const toastTitle = ref('');
+const toastMessage = ref('');
+const toastType = ref('info');
 
-const login = async () => {
-    const isActivated = await electronAPI.getPouchDBName();
-    let db;
-
-    if (isActivated) {
-        db = new PouchDB(isActivated);
+const handleLogin = async () => {
+    if (username.value === 'admin' && password.value === 'password') {
+        // Successful login
+        showToast('Success', 'Logged in successfully!', 'success');
     } else {
-        db = centralDb;
+        // Failed login
+        showToast('Error', 'Invalid credentials. Please try again.', 'error');
     }
+};
 
-    try {
-        const result = await db.find({
-            selector: { username: username.value, password: password.value },
-        });
-
-        if (result.docs.length > 0) {
-            emit('login', isActivated);
-        } else {
-            errorMessage.value = 'Invalid credentials.';
-        }
-    } catch (error) {
-        errorMessage.value = 'Login failed. Please try again.';
-        console.error('Login error:', error);
-    }
+const showToast = (title, message, type) => {
+    toastTitle.value = title;
+    toastMessage.value = message;
+    toastType.value = type;
+    toastVisible.value = true;
 };
 </script>
